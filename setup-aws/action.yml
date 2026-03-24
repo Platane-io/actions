@@ -1,0 +1,31 @@
+name: Setup AWS CLI
+description: Install AWS CLI v2 on the runner
+
+inputs:
+  version:
+    description: AWS CLI version to install (e.g. "2.27.22"). Defaults to latest.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Install AWS CLI
+      shell: bash
+      run: |
+        if command -v aws &>/dev/null; then
+          echo "AWS CLI already installed: $(aws --version)"
+          exit 0
+        fi
+
+        URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+        if [ -n "${{ inputs.version }}" ]; then
+          URL="https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${{ inputs.version }}.zip"
+        fi
+
+        curl -fsSL "$URL" -o /tmp/awscliv2.zip
+        unzip -q /tmp/awscliv2.zip -d /tmp
+        sudo /tmp/aws/install
+        rm -rf /tmp/awscliv2.zip /tmp/aws
+
+        echo "Installed: $(aws --version)"
