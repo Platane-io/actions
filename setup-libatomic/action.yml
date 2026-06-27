@@ -1,0 +1,20 @@
+name: Setup libatomic
+description: >-
+  Install libatomic1 on the runner. actions/node-versions' Node >=26
+  (linux-x64) links libatomic.so.1, which the self-hosted runner image does not
+  ship, so Node fails with "error while loading shared libraries:
+  libatomic.so.1" (exit 127) until it is installed.
+
+runs:
+  using: composite
+  steps:
+    - name: Install libatomic1
+      shell: bash
+      run: |
+        if ldconfig -p 2>/dev/null | grep -q 'libatomic\.so\.1'; then
+          echo "libatomic1 already present"
+          exit 0
+        fi
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends libatomic1
+        echo "Installed libatomic1"
